@@ -8,8 +8,6 @@ import os
 
 unirest.timeout(15) # 5s timeout
 
-#RAPIDAPI_KEY  = "8bdc139898msh4e446cf2db9e0bbp1d2541jsnf672554d4016" 
-#RAPIDAPI_HOST = "apidojo-yahoo-finance-v1.p.rapidapi.com"
 RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY')
 RAPIDAPI_HOST = os.environ.get('RAPIDAPI_HOST')
 print  RAPIDAPI_KEY,RAPIDAPI_HOST
