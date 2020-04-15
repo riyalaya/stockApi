@@ -5,12 +5,12 @@ from datetime import datetime
 import unirest
 from matplotlib import rcParams
 import os
+import json
 
 unirest.timeout(15) # 5s timeout
 
 RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY')
 RAPIDAPI_HOST = os.environ.get('RAPIDAPI_HOST')
-print  RAPIDAPI_KEY,RAPIDAPI_HOST
 
 symbol_string = ""
 inputdata = {}
@@ -24,13 +24,23 @@ def fetchStockData(symbol):
       "Content-Type": "application/json"
     }
   )
-  
-  print response.body
-  print response.code
+  print(response.code)
   if(response.code == 200):
+    file_path = 'stock.dat'
+    mode = 'a+' if os.path.exists(file_path) else 'w+'
+    try:
+        print('Opening stock.dat in mode: {}'.format(mode))
+        with open(file_path, mode) as f:
+            f.write(json.dumps(response.body))
+            print('Data written successfuly to file: {}'.format(file_path))
+
+    except Exception as e:
+        print('EXCEPTION: Error while writing to file: {}, Data type {}'.format(file_path,type(response.body)))
+        print(e)
+
     return response.body
-    print response.body
   else:
+    print('{} statusCode: {} Exception: {}'.format('Error in ccalling Yahoo Api',response.code,response.body))
     return None
 
 
@@ -72,8 +82,15 @@ def attachEvents(inputdata):
 
 
 if __name__ == "__main__":
+ 
+  if os.environ.get('RAPIDAPI_KEY') and os.environ.get('RAPIDAPI_KEY'):
+      print('Environment variables set, good to proceed')
+  else:
+      print('Environment variable not set for API key and host. Script terminates here')
+      import sys
+      sys.exit()
 
-  #try:
+  try:
 
     while len(symbol_string) <= 2:
       symbol_string = raw_input("Enter the stock symbol: ")
@@ -91,7 +108,7 @@ if __name__ == "__main__":
       inputdata["Events"] = attachEvents(retdata)
 
       df = pd.DataFrame(inputdata)
-      print df
+      print(df)
 
       sns.set(style="darkgrid")
 
@@ -114,6 +131,5 @@ if __name__ == "__main__":
 
       plt.show()
 
-  #except Exception as e:
-  #  print "Error" 	
-  #print e
+  except Exception as e:
+    print('{} {}'.format('Error',e)) 	
